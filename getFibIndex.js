@@ -19,6 +19,8 @@ function warpper(){
             }else{
                 return mid;
             }
+
+            mid = ~~((start + end)/2);
         }
 
         return -1;
@@ -48,6 +50,6 @@ function warpper(){
     }
 }
 
-//1 1 2 3 5 8 13 21
+//1 1 2 3 5 8 13 21 34
 
 module.exports = warpper;
