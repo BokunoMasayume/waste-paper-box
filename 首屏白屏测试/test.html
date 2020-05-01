@@ -4,14 +4,17 @@
             background-color: blue;
         }
     </style>
-    <link href="a.ass" rel="stylesheet"> // 10s
+  <!-- <script src="returnafter10s"></script> -->
 
 </head>
 <body>
   <p>1</p>
+
   <p>2</p>
-    <div id="test"></div>
-  <!-- <script>
+    <div id="test">fdsfdsfsdfsd</div>
+  <link href="a.css" rel="stylesheet"> 
+
+  <script>
       let lin = document.createElement('link');
       
 // setTimeout(()=>{
@@ -21,12 +24,15 @@
 // } , 0);
 let test = document.getElementById('test')
 
-for(let i =0 ; i<1000000;i++){
-    test.innerText = i;
-}
-  </script> -->
+test.addEventListener('click',()=>{
+    alert('click')
+});
+// for(let i =0 ; i<1000;i++){
+//     test.innerText = i;
+//     console.log(i)
+// }
+  </script>
 
-  <script src="returnafter10s"></script>
 
   <p>3</p>
 
