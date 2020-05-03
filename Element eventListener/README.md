@@ -6,7 +6,8 @@
 ## 关于绑定和触发事件
 addEventListener , removeEventListener 和 dispatchEvent 都在EventTarget上，鉴于EventTarget没有其他属性，比如listener map或queue，且上面的三个方法都有一个闭包，所以大概所有的handler都存储在这个闭包里，没法直接访问的。
 
-addEventListener 可以绑定非标准的事件，然后用dispatchEvent触发，但onevent不行，如下为尝试：
+addEventListener 可以绑定非标准的事件，然后用dispatchEvent触发,用removeEventListener移除，
+onevent可以用dispatchEvent触发标准事件，但不能触发非标准事件，且不能用removeEventListener移除，如下为尝试：
 ```js
 window.test = document.getElementById('test');
 
