@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="test">
+        sdf
+    </div>
+    <!-- <script>
+        window.test = document.getElementById('test');
+
+        test.onppp = function(){console.log('ppp')};
+        test.onclick = test.onppp;
+
+        test.dispatchEvent(new Event('ppp'));
+        //nothing happened
+
+        test.dispatchEvent(new Event('click'));
+        //log : ppp
+
+    </script> -->
+    <!-- <script>
+        window.test = document.getElementById('test');
+
+        test.onclick = function(){console.log('ppp')};
+        test.removeEventListener('click' , test.onclick);
+        //cannot remove the handler by removeEventListener
+        
+
+    </script> -->
+
+    <script>
+        // document.onclick = function (){console.log('first ,on click')};
+
+        document.addEventListener('click',()=>{console.log( 'bubble'      )} , false);
+        document.addEventListener('click',()=>{console.log(    'capture'     )} , true);
+
+        document.onclick = function (){console.log('last ,on click')};
+
+    </script>
+</body>
+</html>
