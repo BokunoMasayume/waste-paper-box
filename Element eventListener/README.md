@@ -61,3 +61,4 @@ document.addEventListener('click',()=>{console.log(    'capture'     )} , true);
 
 document.onclick = function (){console.log('last ,on click')};
 ```
+-   如果是在debug时，可以在dev tool窗口调用getEventListeners查看某元素上的listeners

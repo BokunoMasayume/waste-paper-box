@@ -32,13 +32,17 @@
 
     </script> -->
 
-    <script>
+    <script defer>
         // document.onclick = function (){console.log('first ,on click')};
 
         document.addEventListener('click',()=>{console.log( 'bubble'      )} , false);
         document.addEventListener('click',()=>{console.log(    'capture'     )} , true);
 
         document.onclick = function (){console.log('last ,on click')};
+
+
+        //getEventListeners only avaliable at dev tool window
+        console.log(getEventListeners(document));
 
     </script>
    
