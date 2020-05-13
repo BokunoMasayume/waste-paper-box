@@ -126,6 +126,8 @@ function operate(operator , val1,val2){
             return val1*val2;
         case '/':
             return val1/val2;
+        default:
+            return NaN;
     }
 
 }
