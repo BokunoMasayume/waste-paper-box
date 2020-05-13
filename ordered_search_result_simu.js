@@ -48,5 +48,7 @@ test();
 // axiosInstance.get().then(
 //     genCallback((arguments)=>{
 //         /**success call back */
-//     })
+//     },()=>{
+//             /**fail call back */
+// })
 // );
