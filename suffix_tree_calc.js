@@ -11,7 +11,9 @@
 
 class SuffixTree{
     constructor(arr){
-        if( ! ( arr instanceof Array )  )
+        if( ! ( arr instanceof Array )  ){
+            throw new Error(`SuffixTree: need array to initialize the SuffixTree instance`)
+        }
         this._arr = arr;
 
 
@@ -22,7 +24,7 @@ class SuffixTree{
     }
 
     genTree(){
-        if(! this._arr || this._arr.length)return false;
+        if((! this._arr) || (! this._arr.length))return false;
 
         //the root node reference
         this.tree = new Node(this._arr[this._arr.length -1]);
@@ -74,9 +76,59 @@ class SuffixTree{
         
 
     }
+
+    calcByTree(){
+        if(! this.tree)this.genTree();
+
+        
+
+        let calc = (node)=>{
+             if(node instanceof Node){
+                 //is a node,an operator
+                 return operate( node.val, calc(node.lchild) , calc(node.rchild) );
+             }else if(node instanceof Leaf){
+                 //is a leaf, a number
+                 return node.val;
+             }else{
+                 return NaN;
+             }
+        }
+
+        return calc(this.tree);
+    }
+
+    calcByArr(){
+        //calc directly by _arr
+        let numbers = [];
+        this._arr.forEach((val)=>{
+            if(operators.includes(val)){
+                //calc a value
+                let val2 = numbers.pop();
+                let val1 = numbers.pop();
+                numbers.push(operate(val , val1, val2));
+            }else{
+                // push a number
+                numbers.push(parseFloat(val));
+            }
+        });
+
+        return numbers[0];
+    }
 }
 
-module.exports = SuffixTree;
+function operate(operator , val1,val2){
+    switch (operator){
+        case '+':
+            return val1+val2;
+        case '-':
+            return val1-val2;
+        case '*':
+            return val1*val2;
+        case '/':
+            return val1/val2;
+    }
+
+}
 
 let operators = "+-*/";
 
@@ -104,3 +156,4 @@ class Leaf{
     }
 }
 
+module.exports = SuffixTree;
