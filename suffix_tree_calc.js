@@ -132,7 +132,10 @@ function operate(operator , val1,val2){
 
 }
 
+// not expose to outside
 let operators = "+-*/";
+//expose to outside
+// SuffixTree.operators = "+-*/";
 
 class Node{
     constructor(val){
