@@ -685,8 +685,6 @@ function identity<T>(arg:T):T{
 //the T in 'identity<T>' is the type variable
 ```
 
-
-P
 ## void 0（external knowledge）
 
 
