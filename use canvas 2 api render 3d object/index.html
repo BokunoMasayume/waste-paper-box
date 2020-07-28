@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>renderer</title>
+</head>
+<body>
+    <canvas id="canvas">
+
+    </canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const width = canvas.width;
+        const height = canvas.height;
+        const PERSPETIVE =  width * .8;
+        const PROJECTION_CENTER_X = width /2;
+        const PROJECTION_CENTER_Y = height /2 ;
+
+        const dots = [];
+
+        class Dot{
+            constructor(){
+                this.x = (Math.random() - .5) * width;
+                this.y = (Math.random() - .5) * height;
+                this.z = Math.random() * width;
+                this.radius = 10;
+
+                this.xProjected = 0;
+                this.yProjected = 0;
+
+                this.scaleProjected = 0;
+            }
+
+            project(){
+                this.scaleProjected = PERSPETIVE / (PERSPETIVE + this.z);
+
+                //camera at (0,0,-Perspetive)
+                // camera look at (0,0,0)
+                this.xProjected = this.x * this.scaleProjected + PROJECTION_CENTER_X;
+                this.yProjected = this.y * this.scaleProjected + PROJECTION_CENTER_Y;
+
+            }
+            draw(ctx){
+                this.project();
+
+                ctx.globalAlpha = 1. - this.z / width;
+
+                ctx.fillRect(this.xProjected , this.yProjected , this.radius , this.radius);
+
+            }
+        }
+
+        for(let i = 0 ; i<500 ; i++){
+            dots.push(new Dot());
+        }
+
+        function genRender(ctx){
+            return function render(){
+                ctx.clearRect(0,0,width , height);
+                dots.forEach(d=>{
+                    d.draw(ctx);
+                });
+
+                requestAnimationFrame(render);
+            }
+        };
+
+        let ctx = canvas.getContext('2d');
+        genRender(ctx)();
+    </script>
+</body>
+</html>
