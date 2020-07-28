@@ -683,11 +683,213 @@ function identity<T>(arg:T):T{
     return arg;
 }
 //the T in 'identity<T>' is the type variable
+
+
+//the way to use generic function
+let output = identity<string>("mystring");
+
+//the second ,and also the most common way to use generic function
+//compiler will set the value of T automatically based on the type of the argument we passed in
+let output2 = identity("mystring");
 ```
 
-## void 0（external knowledge）
+### generic types 泛型类型
+泛型函数的类型和其他的非泛型函数的类型相似，但在前面多了类型参数，然后后面和函数声明相似
+```ts
+function identity<T>(arg:T):T{
+    return arg;
+}
+
+// the type of identity is    <T>(arg:T)=>T
+let myIdentity : <T>(arg:T)=>T = identity 
+
+//the type of identity v2 is  {<T>(arg:T):T}  as an object literal type
+let mi : {<T>(arg:T):T} = identity
+
+//the type of identity v3 is  use non-generic interface 
+interface GenericIdentityFn {
+    <T> (arg:T):T;
+}
+let mi2 : GenericIdentityFn = identity;
+
+//the type of identity v4 is use generic interface 
+//you can specific the type on the interface
+interface GenericIdentityFn<T>{
+    (arg:T):T;
+}
+let mi3 :GenericIdentityFn<number> = identity
+```
+
+### generic classes 泛型类
+```ts
+class GenericNumber<T>{
+    zeroValue:T;
+
+    add:(x:T, y:T)=>T;
+}
+
+let mgn = new GEnericNumber<number>();
+
+mgn.zeroValue = 0;
+mgn.add = function(x,y){return x+y;}
+```
+
+### generic constraints 泛型约束
+举一个例子，在上面的GenericIndentityFn中，我们想访问arg的length属性，但编译器不能证明每种类型都有length属性，所以就报错了。
+为了避免这种报错，我们需要对T列出约束要求。为此，我们定义一个接口来描述约束条件，使用这个接口和extends关键字来实现约束
+```ts
+interface Lengthwise{
+    length:number;
+}
+
+function GenericIdentityFn<T extends Lengthwise>(arg:T):T{
+    console.log(arg.length);
+    return arg;
+}
+```
+
+#### 在泛型约束中使用类型参数
+你可以声明一个类型参数，它被另一个类型参数所约束。例如，现在我们想要用属性名从对象里获取这个属性，并且我们想要确保这个属性存在于对象Obj上，因此我们需要在者两个类型之间使用约束。
+
+在ts使用泛型创建工厂函数时，需要引用构造函数的类类型，比如
+```ts
+function create<T> (c: {new():T}):T{
+    return new c();
+}
+```
 
 
+## enums 枚举
+ts支持数字和字符的枚举。
+
+### 数字枚举
+```ts
+enum Direction{
+    up=1,
+    down, 
+    left,
+    right
+}
+
+//usage
+function respond(message:Direction){
+    //...
+}
+
+respond(Direction.up);
+
+```
+### 字符串枚举
+```ts
+enum Direction{
+    up = "up",
+    down = "down",
+    left = "left",
+    right = "right"
+}
+```
+
+### 异构枚举（不推荐
+```ts
+enum Direction{
+    yes= 0,
+    no = "no"
+}
+}
+```
+### 运行时枚举
+枚举是运行时真正存在的对象
+```ts
+enum E{
+    X,Y,Z
+}
+
+function f(obj :{X:number}){
+    return obj.X;
+}
+f(E)//ok
+```
+
+### 反向映射
+从枚举值到枚举名字
+```ts
+enum Enum{
+    A
+}
+
+let a = Enum.A;
+let nameOfA = Enum[a]//"A"
+```
+
+### 外部枚举
+```ts
+declare enum Foo{
+    X,//computed
+    Y = 2, //non-computed
+    Z,//computed, not 3!!!
+    Q = 1+1 //error
+}
+```
+
+## 高级类型 
+###  交叉类型 Intersection types
+交叉类型是将多个类型合并为一个类型。 这让我们可以把现有的多种类型叠加到一起成为一种类型，它包含了所需的所有类型的特性。 例如， `Person & Serializable & Loggable`同时是 Person 和 Serializable 和 Loggable。 就是说这个类型的对象同时拥有了这三种类型的成员。
+
+我们大多是在混入（mixins）或其它不适合典型面向对象模型的地方看到交叉类型的使用。 （在JavaScript里发生这种情况的场合很多！） 
+
+### 联合类型 union types
+
+联合类型表示一个值可以是几种类型之一。 我们用竖线（ |）分隔每个类型，所以`number | string | boolean`表示一个值可以是 number， string，或 boolean.
+
+如果一个值是联合类型，我们只能访问此联合类型的所有类型里共有的成员。
+
+### 多态的this类型
+多态的 this类型表示的是某个包含类或接口的 子类型。 这被称做 F-bounded多态性。 它能很容易的表现连贯接口间的继承，比如。 在计算器的例子里，在每个操作之后都返回 this类型：
+```ts
+class BasicCalculator {
+    public constructor(protected value: number = 0) { }
+    public currentValue(): number {
+        return this.value;
+    }
+    public add(operand: number): this {
+        this.value += operand;
+        return this;
+    }
+    public multiply(operand: number): this {
+        this.value *= operand;
+        return this;
+    }
+    // ... other operations go here ...
+}
+
+let v = new BasicCalculator(2)
+            .multiply(5)
+            .add(1)
+            .currentValue();
+```
+由于这个类使用了 this类型，你可以继承它，新的类可以直接使用之前的方法，不需要做任何的改变。
+```ts
+class ScientificCalculator extends BasicCalculator {
+    public constructor(value = 0) {
+        super(value);
+    }
+    public sin() {
+        this.value = Math.sin(this.value);
+        return this;
+    }
+    // ... other operations go here ...
+}
+
+let v = new ScientificCalculator(2)
+        .multiply(5)
+        .sin()
+        .add(1)
+        .currentValue();
+```
+### void 0（external knowledge）
+
+
+## modules 模块
 
 
 
