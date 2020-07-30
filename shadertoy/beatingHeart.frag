@@ -5,7 +5,7 @@
 
 
 
-#define AA 2
+#define AA 1
 
 
 float hash1( float n )

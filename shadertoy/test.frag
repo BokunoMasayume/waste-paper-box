@@ -31,25 +31,41 @@ vec3 setCameraAndGetViewdirection(vec3 cp , vec3 la , vec3 vd) {
 // }
 
 float random (float seed) {
-    return fract(sin(seed) *  43758.5453123);
+    return fract(sin(seed) *  43758.5453123 );
 }
 
-float getDist(vec3 p){
+vec2 getDist(vec3 p){
     // position xyz and radius
     // vec4 sphere = vec4(0. , 1.+sin(iTime) , 6. , 1.);
-    vec4 sphere = vec4(0. , 1. , 6. , 1.);
+    p *= 100.;
+    vec2 res = vec2(0.);
+
+    vec4 sphere = vec4(0. , 14. , .0 , 10.);
     float dPlane = abs(p.y);
     float dSphere = length( p - sphere.xyz ) - sphere.w;
-    return min(dPlane , dSphere);
+
+    if(dPlane > dSphere){
+        res.x = dSphere ; 
+        res.y = 1.;
+    }else {
+        res.x = dPlane ; 
+        res.y = 2.;
+    }
+
+    res.x /= 100.;
+    return res;
 }
 
 vec3 getNormal(vec3 p){
     vec2 e = vec2(.01 , 0.);
-    float d = getDist(p);
+    float d = getDist(p).x;
     vec3 n = vec3(
-        getDist(p + e.xyy) -d,
-        getDist(p + e.yxy) -d,
-        getDist(p + e.yyx) -d
+        // getDist(p + e.xyy).x -d,
+        // getDist(p + e.yxy).x -d,
+        // getDist(p + e.yyx).x -d
+        getDist(p + e.xyy).x - getDist(p - e.xyy).x,
+        getDist(p + e.yxy).x - getDist(p - e.yxy).x ,
+        getDist(p + e.yyx).x - getDist(p - e.yyx).x 
     );
 
     return normalize(n);
@@ -58,25 +74,31 @@ vec3 getNormal(vec3 p){
 
 
 
-float rayMarch(vec3 ro , vec3 rd){
+vec2 rayMarch(vec3 ro , vec3 rd){
     float doo = 0.;
+    vec2 res = vec2(0.);
+
     for(int i=0 ; i<MAX_STEPS ;i++){
         vec3 p = ro + doo * rd;
-        float ds = getDist(p);
+        res = getDist(p);
+        float ds = res.x;
         doo += ds;
+        res.x = doo;
         if(ds < SURFACE_DIST || doo > MAX_DIST){
             break;
         }
     }
-    
-    return doo;
+    if(doo > MAX_DIST){
+        res = vec2(-1.);
+    }
+    return res;
 }
 
 //采样范围是一个单位半径的球体，后续要根据法线方向转换为半球
 vec3 getAOKernelSample(float i , float n){
     float xzDir = TWO_PI * fract(i / PHI);
 
-    float zz = 1. - (2. * i)/n;
+    float zz = 1. - (2. * i )/n;
 
     float xzDis = sqrt(1. - zz*zz);
 
@@ -92,8 +114,9 @@ float getAO(vec3 p , vec3 nor){
         vec3 rs = getAOKernelSample(float(i) , 64.);
         //set to hemisphere and set random distance from origin
         rs *= sign(dot(rs, nor)) * random(float(i));
-
-        res += clamp(getDist(p + nor * .001 + rs * rs * .2) , 0. , 1.);
+        // rs = sqrt(rs);
+        //
+        res += clamp(getDist(p + nor * .01 +  rs * .25).x*20. , 0. , 1.);
     }
     res /= 64.;
     return clamp(res,0.,1.);
@@ -107,7 +130,7 @@ float getLight(vec3 p){
     
 
     //multiply this small .02 is for avoid the surface which the p belong to 
-    float d = rayMarch(p +.02*n, l);
+    float d = rayMarch(p +.02*n, l).x;
     if(d<length(lightPos - p))return 0.;
     //usually said as dif
     return clamp(dot(l , n) , 0. , 1.);
@@ -118,38 +141,54 @@ float getLight(vec3 p){
 // p is the coord of the screen space 
 // reuturn color 
 vec3 render(vec2 p){
-    // vec3 cp = vec3(0.4 * sin(iTime * .1) , 1. , .4 * cos(iTime * .1));
-    vec3 cp = vec3(0.,1.,0.);
-    // vec3 la = vec3(.0, .5, .0);
+    vec3 cp = vec3(.8 * sin(iTime * .1) , .25 , 1. * cos(iTime * .1));
+    // vec3 cp = vec3(0.,1.,0.);
+    vec3 la = vec3(.0, .15, .0);
     // setCamera(cp , la);
 
     //ray direction
     // vec3 rd = getViewdirection( vec3(p , 1.7) );
-    // vec3 rd = setCameraAndGetViewdirection(cp , la , vec3(p,1.7));
-    vec3 rd = vec3(p , 1.);
+    vec3 rd = setCameraAndGetViewdirection(cp , la , vec3(p,1.7));
+    // vec3 rd = vec3(p , 1.);
 
-    float d = rayMarch(cp , rd);
-    //intersect position
-    vec3 pos = cp + d * rd;
-    //normal direction
-    vec3 nor = getNormal(pos);
-    //reflect direction
-    vec3 ref = reflect( rd , nor );
-    //light intensity
-    float lin = clamp(1.+dot(nor ,rd) , 0.,1.);
-    //ambient occlusion,bigger ,brighter
-    float occ = getAO(pos , nor);
+    vec2 tmp = rayMarch(cp , rd);
+    float d = tmp.x;
+    float type = tmp.y;
 
-    vec3 color = vec3(.9 , .02, .01);
+    vec3 color = vec3(1.0,0.9,0.7);
 
-    //add light
-    color = color *.72 + vec3(0.9686, 0.8824, 0.8824) * lin * .2;
-    //add shadow
-    color *= (.4+occ);
-    //add reflect
-    color += 10.*vec3(0.9451, 0.9216, 0.9216) * smoothstep(.3, .5, ref.y)*occ;
+    if(d > 0.){
+        
+    
+        //intersect position
+        vec3 pos = cp + d * rd;
+        //normal direction
+        vec3 nor = getNormal(pos);
+        //reflect direction
+        vec3 ref = reflect( rd , nor );
+        //light intensity
+        float lin = clamp(1.+dot(nor ,rd) , 0.,1.);
+        //ambient occlusion,bigger ,brighter
+        float occ = getAO(pos , nor);
+        occ *= occ;
+        if( type < 1.5 ){
 
-    color = clamp(color , 0. , 1.);
+        
+            color = vec3(.9 , .02, .01);
+
+            //add light
+            color = color *.72 + vec3(0.9686, 0.8824, 0.8824) * lin * .2;
+            //add shadow
+            color *= (.4+occ);
+            //add reflect
+            color += 2.*vec3(0.9451, 0.9216, 0.9216) * smoothstep(.3, .8, ref.y)*occ*(.06 + .94*lin*lin);
+            color = pow(color,vec3(0.4545));
+        } else {
+            color *= clamp( sqrt(occ*1.8 ), 0.,1.);
+        }
+        color = clamp(color , 0. , 1.);
+
+    } 
     return color;
 
 }
