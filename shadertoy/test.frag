@@ -43,7 +43,7 @@ vec2 getDist(vec3 p){
     vec4 sphere = vec4(0. , 14. , .0 , 10.);
     float dPlane = abs(p.y);
     float dSphere = length( p - sphere.xyz ) - sphere.w;
-
+    // dSphere /= 3.;
     if(dPlane > dSphere){
         res.x = dSphere ; 
         res.y = 1.;
@@ -210,5 +210,8 @@ void main() {
     // color = vec3(d)/10.;
     // color = vec3( getLight(p) );
     vec3 color = render(uv);
+    vec2 q = gl_FragColor / iResolution.xy;
+
+    color *= 0.2 + 0.8*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y),0.2);
     gl_FragColor = vec4(color , 1.);
 }

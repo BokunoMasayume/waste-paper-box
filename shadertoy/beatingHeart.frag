@@ -15,7 +15,7 @@ float hash1( float n )
 }
 
 
-const float PI = 3.1415926535897932384626433832795;
+const float PI = 3.1415926535;
 const float PHI = 1.6180339887498948482045868343656;
 
 //random choose n ray ,the rays  can combine a sphere;
@@ -24,7 +24,7 @@ vec3 forwardSF( float i, float n)
 {
     float phi = 2.0*PI*fract(i/PHI);
     //zi from -1. to +1.
-    float zi = 1.0 - (2.0*i+1.0)/n;
+    float zi = 1.0 - (2.0*i)/n;
     float sinTheta = sqrt( 1.0 - zi*zi);
     return vec3( cos(phi)*sinTheta, sin(phi)*sinTheta, zi);
 }
