@@ -54,7 +54,7 @@ vec2 map( vec3 q )
 
     float ani = pow( 0.5+0.5*sin(6.28318*iTime + q.y/25.0), 4.0 );
     q *= 1.0 - 0.2*vec3(1.0,0.5,1.0)*ani;
-    q.y -= 1.5*ani;
+    q.y -= 2.*ani;
     float x = abs(q.x);
     
     // x = almostIdentity( x, 1.0, 0.5 ); // remove discontinuity (http://www.iquilezles.org/www/articles/functions/functions.htm)
@@ -111,8 +111,8 @@ float calcAO( in vec3 pos, in vec3 nor )
         //sign function : get the sign of the argument , if less than 0. return -1. ; equal 0. return 0.; greater than 0. return +1.;
         // hash1 can been seen as random function
         //light intensity(ap) is random
-		// ap *= sign( dot(ap,nor) ) * hash1(float(i));
-		ap *= sign( dot(ap,nor) );
+		ap *= sign( dot(ap,nor) ) * hash1(float(i));
+		// ap *= sign( dot(ap,nor) );
         ao += clamp( map( pos + nor*0.01 + ap*0.2 ).x*20.0, 0.0, 1.0 );
     }
 	ao /= 64.0;
@@ -173,6 +173,7 @@ vec3 render( in vec2 p )
             col = col * (.4+occ);
 
             //折射 镜面效果
+            //*(0.06+0.94*pow(fre,5.0)) 降低对比度，光强大处的增量减少
             col += 4.0*vec3(0.8,0.9,1.00)*smoothstep(0.3,0.5,ref.y)*(0.06+0.94*pow(fre,5.0))*occ;
 
             col = pow(col,vec3(0.4545));
