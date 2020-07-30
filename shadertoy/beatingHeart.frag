@@ -170,11 +170,11 @@ vec3 render( in vec2 p )
             
             // vec3 lin  = 4.0*vec3(0.7,0.80,1.00)*(0.5+0.5)*occ;
             //      lin += 0.8*fre*vec3(1.0,1.0,1.00)*(0.6+0.4*occ);
-            col = col * (.4+occ);
+            col *= (.4+occ);
 
             //折射 镜面效果
             //*(0.06+0.94*pow(fre,5.0)) 降低对比度，光强大处的增量减少
-            col += 4.0*vec3(0.8,0.9,1.00)*smoothstep(0.3,0.5,ref.y)*(0.06+0.94*pow(fre,5.0))*occ;
+            col += 4.0*vec3(0.8,0.9,1.00)*smoothstep(0.3,0.8,ref.y)*(0.06+0.94*pow(fre,5.0))*occ;
 
             col = pow(col,vec3(0.4545));
         }

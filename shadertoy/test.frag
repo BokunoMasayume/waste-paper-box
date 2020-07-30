@@ -7,9 +7,9 @@
 #define TWO_PI			6.283185307179586
 #define PHI             1.6180339887498948482045868343656
 
-#define MAX_STEPS 100
+#define MAX_STEPS 300
 #define MAX_DIST 1.
-#define SURFACE_DIST .01
+#define SURFACE_DIST .0001
 
 //cp: camera position
 //la : look at position
@@ -116,7 +116,7 @@ float getAO(vec3 p , vec3 nor){
         rs *= sign(dot(rs, nor)) * random(float(i));
         // rs = sqrt(rs);
         //
-        res += clamp(getDist(p + nor * .01 +  rs * .25).x*20. , 0. , 1.);
+        res += clamp(getDist(p + nor * .01 +  rs * .2).x*20. , 0. , 1.);
     }
     res /= 64.;
     return clamp(res,0.,1.);
