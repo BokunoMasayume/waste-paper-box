@@ -7,9 +7,9 @@
 #define TWO_PI			6.283185307179586
 #define PHI             1.6180339887498948482045868343656
 
-#define MAX_STEPS 100
+#define MAX_STEPS 300
 #define MAX_DIST 100.
-#define SURFACE_DIST .01
+#define SURFACE_DIST .0001
 
 //cp: camera position
 //la : look at position
