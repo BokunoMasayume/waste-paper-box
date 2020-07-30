@@ -18,9 +18,12 @@ float hash1( float n )
 const float PI = 3.1415926535897932384626433832795;
 const float PHI = 1.6180339887498948482045868343656;
 
+//random choose n ray ,the rays  can combine a sphere;
+//return the ray's direction
 vec3 forwardSF( float i, float n) 
 {
     float phi = 2.0*PI*fract(i/PHI);
+    //zi from -1. to +1.
     float zi = 1.0 - (2.0*i+1.0)/n;
     float sinTheta = sqrt( 1.0 - zi*zi);
     return vec3( cos(phi)*sinTheta, sin(phi)*sinTheta, zi);
@@ -103,12 +106,17 @@ float calcAO( in vec3 pos, in vec3 nor )
     for( int i=0; i<64; i++ )
     {
         vec3 kk;
+        //ap is a random light direction, length is 1.
         vec3 ap = forwardSF( float(i), 64.0 );
-		ap *= sign( dot(ap,nor) ) * hash1(float(i));
+        //sign function : get the sign of the argument , if less than 0. return -1. ; equal 0. return 0.; greater than 0. return +1.;
+        // hash1 can been seen as random function
+        //light intensity(ap) is random
+		// ap *= sign( dot(ap,nor) ) * hash1(float(i));
+		ap *= sign( dot(ap,nor) );
         ao += clamp( map( pos + nor*0.01 + ap*0.2 ).x*20.0, 0.0, 1.0 );
     }
 	ao /= 64.0;
-	
+	//周围东西越少，ao越大
     return clamp( ao, 0.0, 1.0 );
 }
 
@@ -145,10 +153,14 @@ vec3 render( in vec2 p )
     {
         vec3 pos = ro + t*rd;
         vec3 nor = calcNormal(pos);
+		// vec3 ref = vec3(1.);
+        //reflect (incident light , normal direction) return reflect direction
 		vec3 ref = reflect( rd, nor );
         float fre = clamp( 1.0 + dot(nor,rd), 0.0, 1.0 );
         
-        float occ = calcAO( pos, nor ); occ = occ*occ;
+        //occ 越大越亮
+        float occ = calcAO( pos, nor ); 
+        occ = occ*occ;
 
         if( res.y<1.5 ) // heart
         {
