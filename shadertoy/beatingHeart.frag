@@ -165,12 +165,15 @@ vec3 render( in vec2 p )
         if( res.y<1.5 ) // heart
         {
             col = vec3(0.9,0.02,0.01);
+            //添加光强
             col = col*0.72 + 0.2*fre*vec3(1.0,0.8,0.2);
             
-            vec3 lin  = 4.0*vec3(0.7,0.80,1.00)*(0.5+0.5*nor.y)*occ;
+            vec3 lin  = 4.0*vec3(0.7,0.80,1.00)*(0.5+0.5)*occ;
                  lin += 0.8*fre*vec3(1.0,1.0,1.00)*(0.6+0.4*occ);
-            col = col * lin;
-            col += 4.0*vec3(0.8,0.9,1.00)*smoothstep(0.0,0.4,ref.y)*(0.06+0.94*pow(fre,5.0))*occ;
+            col = col * (.4+occ);
+
+            //折射 镜面效果
+            col += 4.0*vec3(0.8,0.9,1.00)*smoothstep(0.3,0.5,ref.y)*(0.06+0.94*pow(fre,5.0))*occ;
 
             col = pow(col,vec3(0.4545));
         }
