@@ -8,7 +8,7 @@
 #define PHI             1.6180339887498948482045868343656
 
 #define MAX_STEPS 100
-#define MAX_DIST 100.
+#define MAX_DIST 1.
 #define SURFACE_DIST .01
 
 //cp: camera position
@@ -41,7 +41,7 @@ vec2 getDist(vec3 p){
     vec2 res = vec2(0.);
 
     vec4 sphere = vec4(0. , 14. , .0 , 10.);
-    float dPlane = abs(p.y);
+    float dPlane = p.y;
     float dSphere = length( p - sphere.xyz ) - sphere.w;
     // dSphere /= 3.;
     if(dPlane > dSphere){
@@ -60,12 +60,12 @@ vec3 getNormal(vec3 p){
     vec2 e = vec2(.01 , 0.);
     float d = getDist(p).x;
     vec3 n = vec3(
-        // getDist(p + e.xyy).x -d,
-        // getDist(p + e.yxy).x -d,
-        // getDist(p + e.yyx).x -d
-        getDist(p + e.xyy).x - getDist(p - e.xyy).x,
-        getDist(p + e.yxy).x - getDist(p - e.yxy).x ,
-        getDist(p + e.yyx).x - getDist(p - e.yyx).x 
+        getDist(p + e.xyy).x -d,
+        getDist(p + e.yxy).x -d,
+        getDist(p + e.yyx).x -d
+        // getDist(p + e.xyy).x - getDist(p - e.xyy).x,
+        // getDist(p + e.yxy).x - getDist(p - e.yxy).x ,
+        // getDist(p + e.yyx).x - getDist(p - e.yyx).x 
     );
 
     return normalize(n);
@@ -141,7 +141,7 @@ float getLight(vec3 p){
 // p is the coord of the screen space 
 // reuturn color 
 vec3 render(vec2 p){
-    vec3 cp = vec3(.8 * sin(iTime * .1) , .25 , 1. * cos(iTime * .1));
+    vec3 cp = vec3(.4 * sin(iTime * .1) , .25 , .4 * cos(iTime * .1));
     // vec3 cp = vec3(0.,1.,0.);
     vec3 la = vec3(.0, .15, .0);
     // setCamera(cp , la);
@@ -155,7 +155,7 @@ vec3 render(vec2 p){
     float d = tmp.x;
     float type = tmp.y;
 
-    vec3 color = vec3(1.0,0.9,0.7);
+    vec3 color = vec3(1.0, 1.0, 1.0);
 
     if(d > 0.){
         
@@ -177,11 +177,11 @@ vec3 render(vec2 p){
             color = vec3(.9 , .02, .01);
 
             //add light
-            color = color *.72 + vec3(0.9686, 0.8824, 0.8824) * lin * .2;
+            color = color *.72 + vec3(1. , .8 , .2) * lin * .2;
             //add shadow
             color *= (.4+occ);
             //add reflect
-            color += 2.*vec3(0.9451, 0.9216, 0.9216) * smoothstep(.3, .8, ref.y)*occ*(.06 + .94*lin*lin);
+            color += 4.*vec3(0.8, 0.9, 1.) * smoothstep(.3, .8, ref.y)*occ*(.06 + .94*pow(lin , 5.));
             color = pow(color,vec3(0.4545));
         } else {
             color *= clamp( sqrt(occ*1.8 ), 0.,1.);
@@ -194,7 +194,7 @@ vec3 render(vec2 p){
 }
 
 void main() {
-    vec2 uv = (gl_FragCoord.xy - .5 * iResolution.xy) / iResolution.y;
+    vec2 uv = 2.*(gl_FragCoord.xy - .5 * iResolution.xy) / iResolution.y;
 
     // vec3 color = vec3(0.);
 
@@ -210,8 +210,8 @@ void main() {
     // color = vec3(d)/10.;
     // color = vec3( getLight(p) );
     vec3 color = render(uv);
-    vec2 q = gl_FragColor / iResolution.xy;
+    // vec2 q = gl_FragCoord.xy / iResolution.xy;
 
-    color *= 0.2 + 0.8*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y),0.2);
+    // color *= 0.2 + 0.8*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y),0.2);
     gl_FragColor = vec4(color , 1.);
 }

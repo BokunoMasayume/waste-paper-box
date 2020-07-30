@@ -40,33 +40,32 @@ float almostIdentity( float x, float m, float n )
 }
 
 //get distance
-vec2 map( vec3 q )
+vec2 map( vec3 p )
 {
-    q *= 100.0;
+    p *= 100.0;
 
     //the ground
-    vec2 res = vec2( q.y, 2.0 );
+    vec2 res = vec2( .0 );
 
+    vec4 sphere = vec4(0. ,14. , 0. , 10.);
     //ball;s radius
-    float r = 15.0;
+    // float r = 10.0;
     //lift the heart from ground
-    q.y -= r;
-
-    float ani = pow( 0.5+0.5*sin(6.28318*iTime + q.y/25.0), 4.0 );
-    q *= 1.0 - 0.2*vec3(1.0,0.5,1.0)*ani;
-    q.y -= 2.*ani;
-    float x = abs(q.x);
-    
-    // x = almostIdentity( x, 1.0, 0.5 ); // remove discontinuity (http://www.iquilezles.org/www/articles/functions/functions.htm)
-
-        
-    float y = q.y;
-    float z = q.z;
-    y = 4.0 + y*1.2 - x*sqrt(max((20.0-x)/15.0,0.0));
-    z *= 2.0 - y/15.0;
-    float d = sqrt(x*x+y*y+z*z) - r;
-    d = d/3.0;
-    if( d<res.x ) res = vec2( d, 1.0 );
+    // q.y -= r;
+    // q.y -= 4.;
+    float dPlane = p.y ;
+    float dSphere = length(p - sphere.xyz) - sphere.w;
+    // float ani = pow( 0.5+0.5*sin(6.28318*iTime + q.y/25.0), 4.0 );
+    // q *= 1.0 - 0.2*vec3(1.0,0.5,1.0)*ani;
+    // q.y -= 2.*ani;
+     if(dPlane > dSphere){
+        res.x = dSphere ; 
+        res.y = 1.;
+    }else {
+        res.x = dPlane ; 
+        res.y = 2.;
+    }
+    // if( d<res.x ) res = vec2( d, 1.0 );
     
     res.x /= 100.0;
     return res;
@@ -134,18 +133,19 @@ vec3 render( in vec2 p )
     vec3 ww = normalize( ta - ro );
     vec3 uu = normalize( cross(ww,vec3(0.0,1.0,0.0) ) );
     vec3 vv = normalize( cross(uu,ww));
+    mat3 test = mat3(uu,vv,ww);
 	// create view ray
-	vec3 rd = normalize( p.x*uu + p.y*vv + 1.7*ww );
+	vec3 rd = normalize( test*vec3(p , 1.7) );
 
 
     //-----------------------------------------------------
 	// render
     //-----------------------------------------------------
     
-	vec3 col = vec3(1.0,0.9,0.7);
+	vec3 col = vec3(0.9686, 0.9686, 0.9686);
 
 	// raymarch
-    vec3 uvw;
+    // vec3 uvw;
     vec2 res = intersect(ro,rd);
     float t = res.x;
 
@@ -160,7 +160,7 @@ vec3 render( in vec2 p )
         
         //occ 越大越亮
         float occ = calcAO( pos, nor ); 
-        occ = occ*occ;
+        occ *= occ;
 
         if( res.y<1.5 ) // heart
         {
@@ -168,8 +168,8 @@ vec3 render( in vec2 p )
             //添加光强
             col = col*0.72 + 0.2*fre*vec3(1.0,0.8,0.2);
             
-            vec3 lin  = 4.0*vec3(0.7,0.80,1.00)*(0.5+0.5)*occ;
-                 lin += 0.8*fre*vec3(1.0,1.0,1.00)*(0.6+0.4*occ);
+            // vec3 lin  = 4.0*vec3(0.7,0.80,1.00)*(0.5+0.5)*occ;
+            //      lin += 0.8*fre*vec3(1.0,1.0,1.00)*(0.6+0.4*occ);
             col = col * (.4+occ);
 
             //折射 镜面效果
@@ -189,25 +189,25 @@ vec3 render( in vec2 p )
 }
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-#if AA>1
-    vec3 col = vec3(0.0);
-    for( int m=0; m<AA; m++ )
-    for( int n=0; n<AA; n++ )
-    {
-        vec2 px = fragCoord + vec2(float(m),float(n))/float(AA);
-        vec2 p = (2.0*px-iResolution.xy)/iResolution.y;
-    	col += render( p );    
-    }
-    col /= float(AA*AA);
+// #if AA>1
+//     vec3 col = vec3(0.0);
+//     for( int m=0; m<AA; m++ )
+//     for( int n=0; n<AA; n++ )
+//     {
+//         vec2 px = fragCoord + vec2(float(m),float(n))/float(AA);
+//         vec2 p = (2.0*px-iResolution.xy)/iResolution.y;
+//     	col += render( p );    
+//     }
+//     col /= float(AA*AA);
     
-#else
+// #else
     vec2 p = (2.0*fragCoord-iResolution.xy)/iResolution.y;
 
     vec3 col = render( p );
-#endif    
+// #endif    
     
-    vec2 q = fragCoord/iResolution.xy;
-    col *= 0.2 + 0.8*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y),0.2);
+//     vec2 q = fragCoord/iResolution.xy;
+//     col *= 0.2 + 0.8*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y),0.2);
     
     fragColor = vec4( col, 1.0 );
 }
