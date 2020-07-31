@@ -83,7 +83,23 @@ float sdCappedTorus(vec3 p , vec2 sc , float ra , float rb){
   return sqrt( dot(p,p) + ra*ra - 2.0*ra*k ) - rb;
 }
 
+//r1: 圆环部分半径
+//r2: 圆柱的横截面半径
+//le: 伸长部分hemi-length
+//两种情况：
+//1. 在圆的范围（两个半圆以及向外的辐射区域），同torus
+//2. 在矩形范围，同p点在x或y轴上时的sdf（当圆环平行于视图的时候，垂直于视图的时候就是x轴和z轴）
+//abs(p.y)-le>0 说明在情况一，<0,说明在情况2，p.y设为0，使其在轴上，然后按照torus计算
+float sdLink(vec3 p , float le , float r1 , float r2) {
+    vec3 q = vec3( p.x, max(abs(p.y)-le,0.0), p.z );
+    return length(vec2(length(q.xy)-r1,q.z)) - r2;
+}
 
+//c.z: 圆柱半径
+//c.xz :圆柱中心（c.x, * , c.z）
+float sdCylinder(vec3 p , vec3 c){
+    return length(p.xz - c.xy) - c.z;
+}
 
 //cp: camera position
 //la : look at position
@@ -123,9 +139,10 @@ vec2 getDist(vec3 p){
     // float dRoundBox = sdRoundBox(p - boxCenter , vec3(1.) ,.1);
     // float dBoundingBox = sdBoundingBox(p - boxCenter , vec3(1.) , .1);
     // float dTorus = sdTorus(p - boxCenter , vec2(1.,.2));
-    float dCappedTorus = sdCappedTorus(p-boxCenter , vec2(1.0 , -1.) , .4, .1);
-
-    dSphere = dCappedTorus;
+    // float dCappedTorus = sdCappedTorus(p-boxCenter , vec2(1.0 , -1.) , .4, .1);
+    // float dLink = sdLink(p-boxCenter ,.2, .3,.1);
+    float dcylinder = sdCylinder(p - boxCenter , vec3(.2,.3,.3));
+    dSphere = dcylinder;
     // dSphere /= 3.;
     if(dPlane > dSphere){
         res.x = dSphere ; 
