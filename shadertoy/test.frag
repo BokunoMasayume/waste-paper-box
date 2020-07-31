@@ -7,15 +7,80 @@
 #define TWO_PI			6.283185307179586
 #define PHI             1.6180339887498948482045868343656
 
-#define MAX_STEPS 300
+#define MAX_STEPS 400
 #define MAX_DIST 100.
-#define SURFACE_DIST .0001
+#define SURFACE_DIST .00001
+
+//all these premitives are centered at origin
+
+//p : the position to render
+//b: the hemi-width height and length
+float sdBox(vec3 p  , vec3 b){
+    vec3 q = abs(p) - b;
+    return length( max(q , 0.) ) + min( max(q.x , max(q.y , q.z)) , 0.);
+}
+
+float sdRoundBox( vec3 p , vec3 b , float r ){
+    vec3 q = abs(p) - b;
+    return length( max(q , 0.) ) + min( max(q.x , max(q.y , q.z)) , 0.) - r;
+}
+
+//p: position to be rendered
+//b: outside rect 's hemi-size
+//e: bar width
+float sdBoundingBox(vec3 p , vec3 b , float e){
+    // 距离为正的点可分为3种 
+    // 1. 在外侧盒子之外的点
+    // 2. 在内侧盒子之内的点
+    // 3. 在被掏空的墙壁中的点
+    //对1.中的点，p和q相等，距离求法就是length(p/q)
+    //对2.中的点，其距离为到bar的距离，即length(vec3(0 , q.yz) | vec3(q.x  ,0,q.z) | vec3(q.xy ,0))中最短的那个（q.xyz若小于零取0）
+    //对3.中的点，其距离为q.x|y|z中大于0的最小的那个
+    //这些组合起来，得到下面的公式
+    p = abs(p) - b;
+    //this q ,对于在外侧盒子之外的点，等于p； 
+    vec3 q = abs(p+e) - e ;
+    return min(
+        min(
+            length(max(vec3(p.x,q.y,q.z),0.0))+min(max(p.x,max(q.y,q.z)),0.0),
+            length(max(vec3(q.x,p.y,q.z),0.0))+min(max(q.x,max(p.y,q.z)),0.0)
+        ),
+      length(max(vec3(q.x,q.y,p.z),0.0))+min(max(q.x,max(q.y,p.z)),0.0)
+    );
+}
+
+float sdSphere(vec3 p , float r){
+    return length(p) - r;
+}
+
+float sdPlane(vec3 p , float h){
+    return p.y - h;
+}
+
+//圆环
+//p:position
+//t.x: 圆环的半径
+//t.y: 围成圆环的圆柱的半径
+float sdTorus(vec3 p  ,vec2 t){
+    //q是p到圆柱截面圆心线的距离
+    vec2 q = vec2(length(p.xz ) - t.x , p.y); 
+    return length(q) - t.y;
+}
+
+//sc: 圆环终点的方向
+//ra: 圆环的半径
+//rb: 围成圆环的圆柱的半径
+float sdCappedTorus(vec3 p , vec2 sc , float ra , float rb){
+    p.x = abs(p.x);
+    sc = normalize(sc);
+  float k = (sc.y*p.x>sc.x*p.y) ? dot(p.xy,sc) : length(p.xy);
+  return sqrt( dot(p,p) + ra*ra - 2.0*ra*k ) - rb;
+}
 
 //cp: camera position
 //la : look at position
 vec3 setCameraAndGetViewdirection(vec3 cp , vec3 la , vec3 vd) {
-    vec3 cameraPosition = cp;
-    vec3 lookAt = la;
+    
 
     vec3 ww = normalize( la - cp );
     vec3 uu = normalize( cross(ww, vec3(0. , 1. , 0.)) );
@@ -37,12 +102,22 @@ float random (float seed) {
 vec2 getDist(vec3 p){
     // position xyz and radius
     // vec4 sphere = vec4(0. , 1.+sin(iTime) , 6. , 1.);
-    p *= 100.;
+    // p *= 100.;
     vec2 res = vec2(0.);
 
     vec4 sphere = vec4(0. , 14. , .0 , 10.);
-    float dPlane = p.y;
-    float dSphere = length( p - sphere.xyz ) - sphere.w;
+    float dPlane = sdPlane(p , 0.);
+    float dSphere ;
+    // dSphere = sdSphere(p-sphere.xyz , sphere.w ) ;
+
+    vec3 boxCenter = vec3(0.,1.,0.);
+    // float dBox = sdBox(p - boxCenter , vec3(1.) );
+    // float dRoundBox = sdRoundBox(p - boxCenter , vec3(1.) ,.1);
+    // float dBoundingBox = sdBoundingBox(p - boxCenter , vec3(1.) , .1);
+    // float dTorus = sdTorus(p - boxCenter , vec2(1.,.2));
+    float dCappedTorus = sdCappedTorus(p-boxCenter , vec2(1.0 , -1.) , .4, .1);
+
+    dSphere = dCappedTorus;
     // dSphere /= 3.;
     if(dPlane > dSphere){
         res.x = dSphere ; 
@@ -52,7 +127,7 @@ vec2 getDist(vec3 p){
         res.y = 2.;
     }
 
-    res.x /= 100.;
+    // res.x /= 100.;
     return res;
 }
 
@@ -141,7 +216,7 @@ float getLight(vec3 p){
 // p is the coord of the screen space 
 // reuturn color 
 vec3 render(vec2 p){
-    vec3 cp = vec3(.4 * sin(iTime * .1) , .25 , .4 * cos(iTime * .1));
+    vec3 cp = vec3(4. * sin(iTime * .1) , 2.5 , 4. * cos(iTime * .1));
     // vec3 cp = vec3(0.,1.,0.);
     vec3 la = vec3(.0, .15, .0);
     // setCamera(cp , la);
@@ -165,7 +240,8 @@ vec3 render(vec2 p){
         //normal direction
         vec3 nor = getNormal(pos);
         //reflect direction
-        vec3 ref = reflect( rd , nor );
+        // vec3 ref = reflect( rd , nor );
+        
         //light intensity
         float lin = clamp(1.+dot(nor ,rd) , 0.,1.);
         //ambient occlusion,bigger ,brighter
@@ -181,7 +257,7 @@ vec3 render(vec2 p){
             //add shadow
             color *= (.4+occ);
             //add reflect
-            color += 4.*vec3(0.8, 0.9, 1.) * smoothstep(.3, .8, ref.y)*occ*(.06 + .94*pow(lin , 5.));
+            // color += 4.*vec3(0.8, 0.9, 1.) * smoothstep(.3, .8, ref.y)*occ*(.06 + .94*pow(lin , 5.));
             color = pow(color,vec3(0.4545));
         } else {
             color *= clamp( sqrt(occ*1.8 ), 0.,1.);
