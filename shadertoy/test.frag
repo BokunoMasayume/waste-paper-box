@@ -67,15 +67,23 @@ float sdTorus(vec3 p  ,vec2 t){
     return length(q) - t.y;
 }
 
-//sc: 圆环终点的方向
+//sc: 圆环终点的方向(normalized)
 //ra: 圆环的半径
 //rb: 围成圆环的圆柱的半径
+//两种情况：
+//1. p在圆环存在的方向上，这时sdf计算方式同普通圆环
+//2. p在圆环缺口方向上，这时sdf为到圆环终点的位置的距离 - 围成圆环的圆半径，
+//其圆环的终点位置为sc*ra , 故sdf为 length（p - sc*ra）
+//两者化简后为sqrt(dot(p) + ra*ra - 2*ra*(length(p.xy)|dot(p,vec3(sc,0.) ))) - rb
 float sdCappedTorus(vec3 p , vec2 sc , float ra , float rb){
     p.x = abs(p.x);
     sc = normalize(sc);
+    //this is cross(p , vec3(sc,0.) ).z , 根据右手定则 ， 大于零指向屏幕内，p在sc下，p在缺口方向；小于零p在sc上，p在圆环方向
   float k = (sc.y*p.x>sc.x*p.y) ? dot(p.xy,sc) : length(p.xy);
   return sqrt( dot(p,p) + ra*ra - 2.0*ra*k ) - rb;
 }
+
+
 
 //cp: camera position
 //la : look at position
