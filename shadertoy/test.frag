@@ -78,12 +78,86 @@ float sdTorus(vec3 p  ,vec2 t){
 float sdCappedTorus(vec3 p , vec2 sc , float ra , float rb){
     p.x = abs(p.x);
     sc = normalize(sc);
-    //this is cross(p , vec3(sc,0.) ).z , 根据右手定则 ， 大于零指向屏幕内，p在sc下，p在缺口方向；小于零p在sc上，p在圆环方向
+    //this is cross(p , vec3(sc,0.) ).z , 根据右手定则 ， 指向屏幕内，p在sc下，p在缺口方向；p在sc上，p在圆环方向
   float k = (sc.y*p.x>sc.x*p.y) ? dot(p.xy,sc) : length(p.xy);
   return sqrt( dot(p,p) + ra*ra - 2.0*ra*k ) - rb;
 }
 
 
+//本函数描述的圆锥，其顶点在原点，并向下延伸
+// c : 圆锥斜面的单位向量
+// h: 圆锥的高度
+float sdCone( in vec3 p, in vec2 c, float h )
+{
+  // c is the sin/cos of the angle, h is height
+  // Alternatively pass q instead of (c,h),
+  // which is the point at the base in 2D
+  //圆锥斜面的实际向量，圆锥在x-y轴平面上的三角投影的右下点位置向量
+  vec2 q = h*vec2(c.x/c.y,-1.0);
+    
+  //p转2维
+  vec2 w = vec2( length(p.xz), p.y );
+  //a: 距离斜面的距离向量
+  vec2 a = w - q*clamp( dot(w,q)/dot(q,q), 0.0, 1.0 );
+  //b: 距离底面的距离向量
+  vec2 b = w - q*vec2( clamp( w.x/q.x, 0.0, 1.0 ), 1.0 );
+  //距离底面和斜面那个近选哪个
+  float d = min(dot( a, a ),dot(b, b));
+  //确认距离符号
+  float s = min( (w.x*q.y-w.y*q.x),(w.y-q.y)  );
+  return -1.*sqrt(d)*sign(s);
+}
+
+
+
+float sdInfiniteCone( vec3 p, vec2 c )
+{
+    // c is the sin/cos of the angle
+    vec2 q = vec2( length(p.xz), -p.y );
+    float d = length(q-c*max(dot(q,c), 0.0));
+    return d * ((q.x*c.y-q.y*c.x<0.0)?-1.0:1.0);
+}
+
+float sdPlane(vec3 p , vec3 n , float h){
+    return dot(p,n) + h;
+}
+
+//brilliant!!
+float sdHexPrism( vec3 p, vec2 h )
+{  //   tan 30d度 = cot 60度 = .57735
+  const vec3 k = vec3(-0.8660254, 0.5, 0.57735);
+  p = abs(p);
+  //对称p
+  p.xy -= 2.0*min(dot(k.xy, p.xy), 0.0)*k.xy;
+  vec2 d = vec2(
+       length(p.xy-vec2(clamp(p.x,-k.z*h.x,k.z*h.x), h.x))*sign(p.y-h.x),
+       p.z-h.y );
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0));
+}
+
+float sdTriPrism( vec3 p, vec2 h )
+{
+  vec3 q = abs(p);
+  return max(q.z-h.y,max(q.x*0.866025+p.y*0.5,-p.y)-h.x*0.5);
+}
+
+float sdCapsule( vec3 p, float h, float r )
+{
+  p.y -= clamp( p.y, 0.0, h );
+  return length( p ) - r;
+}
+
+float sdCappedCylinder( vec3 p, float h, float r )
+{
+  vec2 d = abs(vec2(length(p.xz),p.y)) - vec2(h,r);
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0));
+}
+
+float sdRoundedCylinder( vec3 p, float ra, float rb, float h )
+{
+  vec2 d = vec2( length(p.xz)-2.0*ra+rb, abs(p.y) - h );
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rb;
+}
 
 //cp: camera position
 //la : look at position
@@ -118,14 +192,20 @@ vec2 getDist(vec3 p){
     float dSphere ;
     // dSphere = sdSphere(p-sphere.xyz , sphere.w ) ;
 
-    vec3 boxCenter = vec3(0.,1.,0.);
+    vec3 boxCenter = vec3(0.,2.,0.);
     // float dBox = sdBox(p - boxCenter , vec3(1.) );
     // float dRoundBox = sdRoundBox(p - boxCenter , vec3(1.) ,.1);
     // float dBoundingBox = sdBoundingBox(p - boxCenter , vec3(1.) , .1);
     // float dTorus = sdTorus(p - boxCenter , vec2(1.,.2));
-    float dCappedTorus = sdCappedTorus(p-boxCenter , vec2(1.0 , -1.) , .4, .1);
+    // float dCappedTorus = sdCappedTorus(p-boxCenter , vec2(1.0 , -1.) , .4, .1);
+    // float dCone = sdCone( p-boxCenter , vec2(sin(1.),cos(1.)) , 1. );
+    // float dPlane1 = sdPlane(p - boxCenter ,vec3(1.,1.,1.)  , .0);
+    // float dHex = sdHexPrism(p - boxCenter , vec2(.5,.3));
+    // float dTri = sdTriPrism(p - boxCenter , vec2(.7,.3));
+    // float dCaps = sdCapsule(p - boxCenter , .2,.2);
+    float dCaps = sdCappedCylinder(p - boxCenter , .2,.2);
 
-    dSphere = dCappedTorus;
+    dSphere = dCaps;
     // dSphere /= 3.;
     if(dPlane > dSphere){
         res.x = dSphere ; 
