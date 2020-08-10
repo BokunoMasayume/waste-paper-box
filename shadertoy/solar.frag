@@ -87,11 +87,11 @@ vec2 ballcoord(vec3 p , vec2 bias ){
 
 vec3 getEarthCenter(){
     return vec3(.0,0.,.0) ;
-    // return vec3(.10,0.,.5) + vec3(4.*sin(iTime*.4) , 0., 4.*cos(iTime*.4));
+    // return vec3(.10,0.,1.5) + vec3(4.*sin(iTime*.4) , 0., 4.*cos(iTime*.4));
 }
 
 vec3 getSunCenter(){
-    return vec3(20.,3.,0.);
+    return vec3(20.0 , .0 , -200. );
 }
 
 
@@ -129,7 +129,7 @@ vec3 setCameraAndGetViewdirection(vec3 cp , vec3 la , vec3 vd) {
 
     mat3 cameraTransform = mat3(uu, vv, ww);
 
-    return normalize( cameraTransform * vd ) ;
+    return cameraTransform * normalize( vd ) ;
 }
 
 vec3 getNormal(vec3 p){
@@ -191,7 +191,7 @@ vec2 rayMarch(vec3 ro , vec3 rd , float radius){
 
 vec3 render (vec2 p ){
     // vec3 cp = vec3(5.8  , 0. + 6.* (iMouse.y/iResolution.y - .5) , 0.);
-    vec3 cp = vec3(0.  , 0. + 6.* (iMouse.y/iResolution.y - .5) , -5.);
+    vec3 cp = vec3(0.  , 0. + 16.* (iMouse.y/iResolution.y - .5) , -3.);
     // vec3 cp = vec3(4.5 * sin(iTime * .4)  , 0. + 6.* (iMouse.y/iResolution.y - .5) , 4.5 * cos(iTime * .4));
     vec3 la = vec3( 0.,0.,0. );
     vec3 rd = setCameraAndGetViewdirection(cp , la , vec3(p,1.7));
@@ -214,24 +214,37 @@ vec3 render (vec2 p ){
     vec2 ballcor_cloud = ballcoord(pos_cloud - getEarthCenter() , vec2(0.,mod(iTime *.2, 2.*PHI) ));
 
     vec2 ballcor = ballcoord(pos - getEarthCenter() , vec2( 0.,mod(iTime *.1, 2.*PHI)  )  );
+    if( tmp.y <0.  ){
+        return texture(iChannel4 , ballcor_cloud).xyz;
+    }
 
     vec3 nor = texture(iChannel1 , ballcor).xyz  ;
-    nor = normalize(nor);
+    nor = normalize(nor*2. - 1.);
 
     // vec3 light =  normalize( vec3(sin(iTime*1.5),-.3,cos(iTime*1.5)) ); 
     vec3 light = normalize( getSunCenter()  - pos );
     // vec3 light =  normalize( vec3( 1.,1.,1. ) ); 
 
-    float sphereShadow = dot(normalize(pos - getEarthCenter() ), light);
+    float sphereShadow = dot(normalize(pos - getEarthCenter() ), light)  ;
     
     
-    float landShadow = smoothstep(.35,.5 , dot(nor , light));
+    float landShadow = max(0. , dot(nor , -light) );
+    // vec3(1.0,.95,1.0);
+    // landShadow = 1. - landShadow;
+    landShadow = smoothstep(.01,.8 , landShadow);
 
     return mix(
-        .3*dot(texture(iChannel5 , ballcor).xyz , normalize(pos- getEarthCenter()) ) +
-         mix( landShadow *  texture(iChannel0 , ballcor).xyz , texture(iChannel3 , ballcor).xyz  , 1. - sphereShadow ),
+         mix( 
+        // dot(texture(iChannel5 , ballcor).xyz , light ) +
+              texture(iChannel0 , ballcor).xyz 
+            //   - landShadow *.4
+              ,
+
+              texture(iChannel3 , ballcor).xyz  , 
+
+              1. - sphereShadow ),
     //  return  mix(texture(iChannel0 , ballcor).xyz , texture(iChannel3 , ballcor).xyz  , 1.-sphereShadow );
-         min(1.,sphereShadow+.6) * texture(iChannel4 , ballcor_cloud).xyz,
+         max(0.2,sphereShadow) * texture(iChannel4 , ballcor_cloud).xyz,
          texture(iChannel4  , ballcor_cloud).x
     );
     // return  dot(pos , light)*smoothstep(.35,.5 , dot(nor , light)) * texture(iChannel0 , ballcor).xyz;
