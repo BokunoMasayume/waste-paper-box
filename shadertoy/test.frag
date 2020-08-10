@@ -182,8 +182,8 @@ vec3 setCameraAndGetViewdirection(vec3 cp , vec3 la , vec3 vd) {
     
 
     vec3 ww = normalize( la - cp );
-    vec3 uu = normalize( cross(ww, vec3(0. , 1. , 0.)) );
-    vec3 vv = normalize( cross(uu ,ww) );
+    vec3 uu = normalize( cross( vec3(0. , 1. , 0.) ,ww) );
+    vec3 vv = normalize( cross(ww , uu) );
 
     mat3 cameraTransform = mat3(uu, vv, ww);
 

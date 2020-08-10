@@ -1,14 +1,15 @@
-// #iChannel0 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_daymap.jpg"
-// #iChannel1 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_normal_map.jpg"
-// #iChannel2  "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_stars.jpg"
-// #iChannel3 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_nightmap.jpg"
-// #iChannel4 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_clouds.jpg"
+#iChannel0 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_daymap.jpg"
+#iChannel1 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_normal_map.jpg"
+#iChannel2  "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_stars.jpg"
+#iChannel3 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_nightmap.jpg"
+#iChannel4 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_clouds.jpg"
+#iChannel5 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_specular_map.jpg"
 
-#iChannel0 "file://Users/yashanzhang/Downloads/waste-paper-box-master/shadertoy/textures/solar/2k_earth_daymap.jpg"
-#iChannel1 "file://Users/yashanzhang/Downloads/waste-paper-box-master/shadertoy/textures/solar/2k_earth_normal_map.jpg"
-#iChannel2  "file://Users/yashanzhang/Downloads/waste-paper-box-master/shadertoy/textures/solar/2k_stars.jpg"
-#iChannel3 "file://Users/yashanzhang/Downloads/waste-paper-box-master/shadertoy/textures/solar/2k_earth_nightmap.jpg"
-#iChannel4 "file://Users/yashanzhang/Downloads/waste-paper-box-master/shadertoy/textures/solar/2k_earth_clouds.jpg"
+// #iChannel0 "file://Users/yashanzhang/Downloads/waste-paper-box-master/shadertoy/textures/solar/2k_earth_daymap.jpg"
+// #iChannel1 "file://Users/yashanzhang/Downloads/waste-paper-box-master/shadertoy/textures/solar/2k_earth_normal_map.jpg"
+// #iChannel2  "file://Users/yashanzhang/Downloads/waste-paper-box-master/shadertoy/textures/solar/2k_stars.jpg"
+// #iChannel3 "file://Users/yashanzhang/Downloads/waste-paper-box-master/shadertoy/textures/solar/2k_earth_nightmap.jpg"
+// #iChannel4 "file://Users/yashanzhang/Downloads/waste-paper-box-master/shadertoy/textures/solar/2k_earth_clouds.jpg"
 
 
 
@@ -85,11 +86,12 @@ vec2 ballcoord(vec3 p , vec2 bias ){
 }
 
 vec3 getEarthCenter(){
-    return vec3(.10,0.,.5) + vec3(4.*sin(iTime*.4) , 0., 4.*cos(iTime*.4));
+    return vec3(.0,0.,.0) ;
+    // return vec3(.10,0.,.5) + vec3(4.*sin(iTime*.4) , 0., 4.*cos(iTime*.4));
 }
 
 vec3 getSunCenter(){
-    return vec3(20.,30.7,10.);
+    return vec3(20.,3.,0.);
 }
 
 
@@ -122,8 +124,8 @@ vec3 setCameraAndGetViewdirection(vec3 cp , vec3 la , vec3 vd) {
     
 
     vec3 ww = normalize( la - cp );
-    vec3 uu = normalize( cross(ww, vec3(0. , 1. , 0.)) );
-    vec3 vv = normalize( cross(uu ,ww) );
+    vec3 uu = normalize( cross(vec3(0. , 1. , 0.) , ww  ) );
+    vec3 vv = normalize( cross(ww , uu ) );
 
     mat3 cameraTransform = mat3(uu, vv, ww);
 
@@ -220,13 +222,14 @@ vec3 render (vec2 p ){
     vec3 light = normalize( getSunCenter()  - pos );
     // vec3 light =  normalize( vec3( 1.,1.,1. ) ); 
 
-    float sphereShadow = dot(normalize(pos ), light);
+    float sphereShadow = dot(normalize(pos - getEarthCenter() ), light);
     
     
     float landShadow = smoothstep(.35,.5 , dot(nor , light));
 
     return mix(
-         mix( landShadow *  texture(iChannel0 , ballcor).xyz , texture(iChannel3 , ballcor).xyz  , 1.-sphereShadow ),
+        .3*dot(texture(iChannel5 , ballcor).xyz , normalize(pos- getEarthCenter()) ) +
+         mix( landShadow *  texture(iChannel0 , ballcor).xyz , texture(iChannel3 , ballcor).xyz  , 1. - sphereShadow ),
     //  return  mix(texture(iChannel0 , ballcor).xyz , texture(iChannel3 , ballcor).xyz  , 1.-sphereShadow );
          min(1.,sphereShadow+.6) * texture(iChannel4 , ballcor_cloud).xyz,
          texture(iChannel4  , ballcor_cloud).x
