@@ -43,6 +43,13 @@ float noise(float seed){
     );
 }
 
+vec3 sunColor(vec2 uv){
+    vec2 sunCenter = vec2(.8,.9);
+    float sunDist = max(0.0,  1.0 - length(uv - sunCenter));
+    vec3 sunColor = vec3(15., 9., 6.) * (pow(sunDist, 12.0) * (1.0 + 0.25 * noise( sin(iTime)+ iTime *.1+ 28.0 * atan( (uv-sunCenter).x, - (uv-sunCenter).y))  ));
+    return sunColor;
+}
+
 vec2 ballcoord(vec3 p){
     p = normalize(p);
     vec2 pxy_z = vec2( length(p.xy) ,p.z);
@@ -88,11 +95,12 @@ vec2 ballcoord(vec3 p , vec2 bias ){
 
 vec3 getEarthCenter(){
     return vec3(.0,0.,.0) ;
-    // return vec3(.10,0.,1.5) + vec3(4.*sin(iTime*.4) , 0., 4.*cos(iTime*.4));
+    // return vec3(.10,0.,1.5) + vec3(3.*sin(iTime*.4) , 0., 3.*cos(iTime*.4));
 }
 
 vec3 getSunCenter(){
-    return vec3(.0+ 16.* (iMouse.x/iResolution.x - .5)  , .0+ 16.* (iMouse.y/iResolution.y - .5)  , -20. );
+    // return vec3(.0+ 16.* (iMouse.x/iResolution.x - .5)  , .0+ 16.* (iMouse.y/iResolution.y - .5)  , -20. );
+    return vec3(20.  , 30.  , 600. );
 }
 
 
@@ -204,7 +212,7 @@ vec2 rayMarch(vec3 ro , vec3 rd , float radius){
 
 vec3 render (vec2 p ){
     // vec3 cp = vec3(5.8  , 0. + 6.* (iMouse.y/iResolution.y - .5) , 0.);
-    vec3 cp = vec3(0.  , 3. , -2.);
+    vec3 cp = vec3(1.  , .2 , 2.);
     // vec3 cp = vec3(4.5 * sin(iTime * .4)  , 0. + 6.* (iMouse.y/iResolution.y - .5) , 4.5 * cos(iTime * .4));
     vec3 la = vec3( 0.,0.,0. );
     vec3 rd = setCameraAndGetViewdirection(cp , la , vec3(p,1.7));
@@ -218,7 +226,12 @@ vec3 render (vec2 p ){
     vec2 tmp_cloud = rayMarch(cp , rd , 1.02);
 
     if(tmp_cloud.y<0.){
-        return texture(iChannel2 , .5*(p+1.)).xyz;
+        vec3 suncol = sunColor(p);
+        return mix(
+            texture(iChannel2 , .5*(p+1.)).xyz,
+            suncol , 
+            suncol.x
+        );
     }
 
     vec3 pos = cp + rd * tmp.x;
@@ -236,7 +249,8 @@ vec3 render (vec2 p ){
     nor = qie2objspace(  pos- getEarthCenter() , nor );
 
     // vec3 light =  normalize( vec3(sin(iTime*1.5),-.3,cos(iTime*1.5)) ); 
-    vec3 light = normalize( getSunCenter()  - pos );
+    vec3 light = normalize( getSunCenter()  - getEarthCenter() );
+    // vec3 light = normalize( getSunCenter()  - pos );
     // vec3 light =  normalize( vec3( 1.,1.,1. ) ); 
 
     float sphereShadow = dot(normalize(pos - getEarthCenter() ), light)  ;
@@ -245,13 +259,13 @@ vec3 render (vec2 p ){
     float landShadow =  dot(nor , light) ;
     // vec3(1.0,.95,1.0);
     // landShadow = 1. - landShadow;
-    landShadow = smoothstep(.0,.8 , landShadow);
+    landShadow = smoothstep(.0,.95 , landShadow);
 
     return mix(
          mix( 
         // dot(texture(iChannel5 , ballcor).xyz , light ) +
               texture(iChannel0 , ballcor).xyz 
-              * pow(landShadow , 10.)
+              * pow(landShadow , 15.)
 
               ,
 
@@ -281,11 +295,11 @@ void main(){
     // gl_FragColor = vec4(smoothstep(asin(uv.x)/PHI , asin(uv.x)/PHI+0.001, uv.y));
     // gl_FragColor = vec4(smoothstep(acos(uv.x)/PHI , acos(uv.x)/PHI+0.001, uv.y));
     gl_FragColor = vec4( render(uv)  ,1.);
-    gl_FragColor = vec4( sunColor  ,1.);
+    // gl_FragColor = vec4( sunColor  ,1.);
 
-    gl_FragColor = mix (   
-        vec4( render(uv)  ,1.),
-        vec4( sunColor  ,1.),
-        sunColor.x
-    );
+    // gl_FragColor = mix (   
+    //     vec4( render(uv)  ,1.),
+    //     vec4( sunColor  ,1.),
+    //     sunColor.x
+    // );
 }
