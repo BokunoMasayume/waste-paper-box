@@ -5,12 +5,12 @@
 // #iChannel4 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_clouds.jpg"
 // #iChannel5 "file://D:/VSCodeProject/waste-paper-box/shadertoy/textures/solar/2k_earth_specular_map.jpg"
 
-#iChannel0 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_daymap.jpg"
-#iChannel1 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_normal_map.jpg"
-#iChannel2  "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_stars.jpg"
-#iChannel3 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_nightmap.jpg"
-#iChannel4 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_clouds.jpg"
-#iChannel5 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_specular_map.jpg"
+#iChannel0 "file:///Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_daymap.jpg"
+#iChannel1 "file:///Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_normal_map.jpg"
+#iChannel2 "file:///Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_stars.jpg"
+#iChannel3 "file:///Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_nightmap.jpg"
+#iChannel4 "file:///Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_clouds.jpg"
+#iChannel5 "file:///Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_specular_map.jpg"
 
 
 
