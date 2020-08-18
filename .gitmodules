@@ -1,0 +1,3 @@
+[submodule "WebGL2Samples"]
+	path = WebGL2Samples
+	url = https://github.com/WebGLSamples/WebGL2Samples.git
