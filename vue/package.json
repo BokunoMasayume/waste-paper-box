@@ -1,0 +1,22 @@
+{
+  "name": "vuelearn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "css-loader": "^4.2.1",
+    "express": "^4.17.1",
+    "file-loader": "^6.0.0",
+    "style-loader": "^1.2.1",
+    "vue": "^2.6.11",
+    "vue-server-renderer": "^2.6.11",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
