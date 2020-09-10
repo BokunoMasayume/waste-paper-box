@@ -94,8 +94,8 @@ vec2 ballcoord(vec3 p , vec2 bias ){
 }
 
 vec3 getEarthCenter(){
-    return vec3(.0,0.,.0) ;
-    // return vec3(.10,0.,1.5) + vec3(3.*sin(iTime*.4) , 0., 3.*cos(iTime*.4));
+    // return vec3(.0,0.,.0) ;
+    return vec3(.10,0.,1.9) + vec3(3.*sin(iTime*.6) , 0., 3.*cos(iTime*.6));
 }
 
 vec3 getSunCenter(){
@@ -212,7 +212,7 @@ vec2 rayMarch(vec3 ro , vec3 rd , float radius){
 
 vec3 render (vec2 p ){
     // vec3 cp = vec3(5.8  , 0. + 6.* (iMouse.y/iResolution.y - .5) , 0.);
-    vec3 cp = vec3(1.  , .2 , 2.);
+    vec3 cp = vec3(1.  , .2 , -2.);
     // vec3 cp = vec3(4.5 * sin(iTime * .4)  , 0. + 6.* (iMouse.y/iResolution.y - .5) , 4.5 * cos(iTime * .4));
     vec3 la = vec3( 0.,0.,0. );
     vec3 rd = setCameraAndGetViewdirection(cp , la , vec3(p,1.7));
@@ -249,7 +249,7 @@ vec3 render (vec2 p ){
     nor = qie2objspace(  pos- getEarthCenter() , nor );
 
     // vec3 light =  normalize( vec3(sin(iTime*1.5),-.3,cos(iTime*1.5)) ); 
-    vec3 light = normalize( getSunCenter()  - getEarthCenter() );
+    vec3 light = normalize(- getSunCenter()  + getEarthCenter() );
     // vec3 light = normalize( getSunCenter()  - pos );
     // vec3 light =  normalize( vec3( 1.,1.,1. ) ); 
 

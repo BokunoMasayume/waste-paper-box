@@ -1,0 +1,79 @@
+<!-- 测试video原生事件触发条件 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频事件</title>
+    <style>
+        video{
+            margin-top: 20px;
+            margin-left:20px;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop src='./dance.mp4' controls width="400px" >
+    </video>
+
+    <button>点我换源</button>
+
+    <script>
+
+        const video_source = [
+            '../assets/video/dance.mp4',
+            '../assets/video/game.mp4'
+        ]
+        let now = 0;
+
+        let video = document.querySelector('video');
+
+
+        let btn = document.querySelector('button');
+        btn.onclick = function(){
+            now = (now+1) % video_source.length;
+            video.src = video_source[now];
+        }
+
+        video.addEventListener('playing',()=>{
+            console.log('playing is fired', 'paused:',video.paused,' seeking:', video.seeking);
+        });
+
+        video.addEventListener('play', ()=>{
+            console.log('play is fired', 'paused:',video.paused,' seeking:', video.seeking);
+        });
+
+        video.addEventListener('abort', ()=>{
+            console.log('abort is fired', 'paused:',video.paused,' seeking:', video.seeking);
+        });
+
+        video.addEventListener('pause', ()=>{
+            console.log('pause is fired', 'paused:',video.paused,' seeking:', video.seeking);
+        });
+
+        video.addEventListener('ended',()=>{
+            console.log('ended is fired', 'paused:',video.paused,' seeking:', video.seeking);
+        });
+
+        video.addEventListener('emptied',()=>{
+            console.log('emptied is fired', 'paused:',video.paused,' seeking:', video.seeking)
+        });
+
+        video.addEventListener('seeked', ()=>{
+            console.log('seeked is fired', 'paused:',video.paused,' seeking:', video.seeking);
+        });
+
+        video.addEventListener('seeking', ()=>{
+            console.log('seeking is fired', 'paused:',video.paused,' seeking:', video.seeking)
+        });
+        // 自动播放时:
+        // seek 时: pause seeking seeked playing play
+        // 重播 时: seeking seeked playing
+        // 换源 时: abort emptied play playing
+        //-------------------------------------------
+        // 无自动播放时 :
+
+    </script>
+</body>
+</html>
