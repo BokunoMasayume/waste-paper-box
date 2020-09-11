@@ -19,10 +19,10 @@ uniform sampler2D u_video2;
 void main (){
     vec4 color  = texture(u_video1 , v_texturePosition);
 
-    if(order <= 1.3){
-        color  = texture(u_video1 , v_texturePosition);
-    }else {
+    if(order <= 1.){
         color  = texture(u_video2 , v_texturePosition);
+    }else {
+        color  = texture(u_video1 , v_texturePosition);
     }
 
     outColor =color;

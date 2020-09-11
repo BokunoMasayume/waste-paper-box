@@ -32,7 +32,7 @@ vec3 getTransformedPosition(vec3 cp , vec3 la , vec3 vd) {
 }
 
 void main(){
-    vec3 position = vec3(1. - a_position.x*2., a_position.y*2. - 1., a_position.z);
+    vec3 position = vec3(a_position.x*2. - 1., a_position.y*2. - 1., a_position.z);
     // 会造成形变
     // gl_Position = vec4(getTransformedPosition(vec3(u_mouse*2.,1.), vec3(0.,0.,0.), position), 1.);
 

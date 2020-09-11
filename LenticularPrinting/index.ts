@@ -102,6 +102,9 @@ let program = createProgram(
     createShader(gl, gl.VERTEX_SHADER, lenVert),
     createShader(gl, gl.FRAGMENT_SHADER, lenFrag)
 );
+
+gl.enable(gl.DEPTH_TEST);
+
 gl.useProgram(program);
 
 gl.viewport(0 , 0,  canvas.width , canvas.height);
@@ -116,6 +119,7 @@ gl.uniform1i(position2, 1);
 
 canvas.addEventListener('mousemove', (e)=>{
    gl.uniform2fv( (gl as WebGL2RenderingContext & { MousePosition?:WebGLUniformLocation}).MousePosition, [e.offsetX / canvas.clientWidth - .5, - e.offsetY / canvas.clientHeight + .5]);
+   console.log('u_mouse',e.offsetX / canvas.clientWidth - .5, - e.offsetY / canvas.clientHeight + .5);
 });
 
 // video 1
