@@ -32,15 +32,20 @@ vec3 getTransformedPosition(vec3 cp , vec3 la , vec3 vd) {
 }
 
 void main(){
-    // vec2 p = (a_position.xy / u_resolution) ;
-    // vec2 p = (a_position / u_resolution.y) *2. - 1.;
-    vec3 position = vec3(a_position.xy*2. -1., a_position.z);
-    gl_Position = vec4(getTransformedPosition(vec3(u_mouse*2.,1.), vec3(0.,0.,0.), position), 1.);
+    vec3 position = vec3(1. - a_position.x*2., a_position.y*2. - 1., a_position.z);
+    // 会造成形变
+    // gl_Position = vec4(getTransformedPosition(vec3(u_mouse*2.,1.), vec3(0.,0.,0.), position), 1.);
 
-    // texture positon range : 0 ~ 1
+    // 无形变
+    if( a_position.z != 0. ){
+        gl_Position = vec4( position.xy + (u_mouse.xy)*.02, position.z, 1.);
+    }
+    else {
+        gl_Position = vec4(position, 1.);
+    }
+
     v_texturePosition = a_position.xy  ;
 
-    // time = iTime;
     resolution = u_resolution;
 
     float idx = mod(float(gl_VertexID), 12.);
@@ -49,8 +54,4 @@ void main(){
 
     
 
-    // mouse = u_mouse/u_resolution;
-    // mouse.y = 1.-mouse.y;
-
-    // texturesize = u_textureSize;
 }

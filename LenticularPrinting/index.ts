@@ -2,8 +2,8 @@ import { createShader, createProgram } from './util/webgl2Util';
 
 import lenFrag from './shader/lenticular.frag';
 import lenVert from './shader/lenticular.vert';
-const row = 200;
-const col = 200;
+const row = 300;
+const col = 300;
 const depth = -.05;
 let positions = new Float32Array(row * col * 4 * 3 * 3);
 for(let i=0 ; i <  col ; i++){
