@@ -7,10 +7,10 @@
 
 #iChannel0 "file:///Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_daymap.jpg"
 #iChannel1 "file:///Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_normal_map.jpg"
-// #iChannel2  "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_stars.jpg"
-// #iChannel3 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_nightmap.jpg"
-// #iChannel4 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_clouds.jpg"
-// #iChannel5 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_specular_map.jpg"
+#iChannel2  "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_stars.jpg"
+#iChannel3 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_nightmap.jpg"
+#iChannel4 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_clouds.jpg"
+#iChannel5 "file://Users/yashanzhang/codes/waste-paper-box/shadertoy/textures/solar/2k_earth_specular_map.jpg"
 
 
 
@@ -216,9 +216,36 @@ vec3 render (vec2 p ){
 
 void main(){
 
-    vec2 uv = gl_FragCoord.xy / iResolution.x;
+    vec2 uv = gl_FragCoord.xy / iResolution.xy;
     // vec2 uv = 2.*(gl_FragCoord.xy - .5 * iResolution.xy) / iResolution.x;
    
-   gl_FragColor = vec4( render(uv)  ,1.);
-    
+  // gl_FragColor = vec4( render(uv)  ,1.);
+  //gl_FragColor = vec4( texture(iChannel0, uv).xyz,1.);
+    vec3 n = texture(iChannel1, uv).xyz;
+    n = n*2. -1.;
+    n.z *=.1;
+    n.x*=6.;
+    n.y*=6.;
+   // n = n*n*n*n;
+  // if(length(n)<48.)n=vec3(0.);
+  //  n.x *= 10.;
+    //n.y *= 10.;
+    //n = smoothstep(vec3(5.), vec3(6.) ,n);
+
+    //n = 400. * n;
+   // n = smoothstep(vec3(80.), vec3(100.), n);
+    //n = normalize(n);
+    //n = (n+.8);
+    //n = n*n*n*n*n*n;
+   // n = smoothstep(vec3(-1.), vec3(1.), n*300.);
+    vec3 c = texture(iChannel0, uv).xyz;
+    gl_FragColor =vec4(
+        .8 *c+  .6*
+       //vec3(
+       dot( n,normalize(vec3((iMouse.xy/iResolution.xy )*2.-1., .3) ) ) 
+      // )
+        ,1. );
+
+        //gl_FragColor = vec4(iMouse.xy/iResolution.xy *2. -1., 0.,1.);
+    //gl_FragColor = vec4(n, 1. );
 }
