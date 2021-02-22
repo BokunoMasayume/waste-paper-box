@@ -55,6 +55,50 @@ float noise( vec3 x )
 	return mix( rg.x, rg.y, f.z );
 }
 
+float fbm4 (vec2 p) {
+    float n = 0.;
+    n += 1. * noise(p);
+    n += 0.5 * noise(p * 2.);
+    n += 0.25 * noise (p * 4.);
+    n += 0.125 * noise(p * 8.);
+    return n;
+}
+
+float fbm4 (vec3 p) {
+    float n = 0.;
+    n += 1. * noise(p);
+    n += 0.5 * noise(p * 2.);
+    n += 0.25 * noise (p * 4.);
+    n += 0.125 * noise(p * 8.);
+    return n;
+}
+
+float fbm6 (vec2 p) {
+    float n = 0.;
+    n += 1. * noise(p);
+    n += 0.5 * noise(p * 2.);
+    n += 0.25 * noise (p * 4.);
+    n += 0.125 * noise(p * 8.);
+    n += 0.0625 * noise(p * 16.);
+    n += 0.03125 * noise(p * 32.);
+    return n;
+}
+
+float fbm6 (vec3 p) {
+    float n = 0.;
+    n += 1. * noise(p);
+    n += 0.5 * noise(p * 2.);
+    n += 0.25 * noise (p * 4.);
+    n += 0.125 * noise(p * 8.);
+    n += 0.0625 * noise(p * 16.);
+    n += 0.03125 * noise(p * 32.);
+    return n;
+}
+
+float ndot(vec2 a, vec2 b) {
+    return a.x * b.x - a.y * b.y;
+}
+
 // volum distance function,  distance form one point to the volume
 float sphere(vec3 center , float radius) {
     return length(center) - radius;
