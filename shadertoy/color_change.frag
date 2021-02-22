@@ -1,3 +1,4 @@
+#iChannel0 "file:///Users/yashanzhang/codes/waste-paper-box/assets/imgs/nightcity1.jpeg"
 
 
 vec3 hsv2rgb(vec3 hsv) {
@@ -73,8 +74,9 @@ vec3 rgb2hsv(vec3 rgb) {
 
 void main () {
     vec3 col = vec3(1., 0.5, 1.);
+    col = texture(iChannel0, gl_FragCoord.xy / iResolution.xy).xyz;
     vec3 col2 = rgb2hsv(col );
-    col2.x = mod(col2.x + 120., 360.);
+    col2.x = mod(col2.x + iTime * 300., 360.);
     col = hsv2rgb(col2) ;
     gl_FragColor = vec4(col, 1.);
 }
